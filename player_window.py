@@ -25,8 +25,10 @@ class Player:
         self.window.close()
 
     def play_station(self):
-        if self.runner != None:
-            self.runner.terminate()
+        # As of now, second try not working, to say at least.
+        # Need to work on cleaning up previous playback.
+        if self.runner is not None:
+            del self.runner
             self.runner = None
         ffmpeg = 'C:\\tools\\ffmpeg\\bin\\ffplay.exe'
         params = 'https://an.cdn.eurozet.pl/ant-waw.mp3'

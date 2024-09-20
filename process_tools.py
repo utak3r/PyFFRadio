@@ -10,6 +10,9 @@ class ProcessRunner:
     def __init__(self) -> None:
         self.process = None
     
+    def __del__(self):
+        self.terminate()
+    
     def run_command(self, command):
         self.add_log(command)
         asyncio.run(self.run(command))
