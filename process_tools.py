@@ -30,6 +30,8 @@ class ProcessRunner:
             else:
                 break
 
+    # WARNING!
+    # This code REQUIRES Python 3.11 at least!
     async def run(self, command):
         try:
             self.process = await asyncio.create_subprocess_shell(command, stdin=asyncio.subprocess.DEVNULL, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
