@@ -66,7 +66,7 @@ class Settings:
         # Below line changes the default behaviour of ConfigParser
         # making the keys to be case sensitive :)
         config.optionxform = str
-        config.read('PyFFRadio.ini')
+        config.read('PyFFRadio.ini', encoding="utf-8")
         try:
             self.ffmpeg_ = config['PATHS']['FFMPEG_Path']
         except KeyError:

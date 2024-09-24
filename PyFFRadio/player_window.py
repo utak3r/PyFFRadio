@@ -1,6 +1,6 @@
 import PySimpleGUI as sg
-import process_tools
-import settings
+from PyFFRadio import process_tools
+from PyFFRadio import settings
 
 class Player:
 
