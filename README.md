@@ -24,3 +24,9 @@ For VSCode, use *launch.json* file in your *.vscode* subdirectory:
     ]
 }
 ```
+
+# Building a standalone app without Python
+Just run PyInstaller using included spec file:
+```
+pyinstaller --clean PyFFRadio.spec
+```
