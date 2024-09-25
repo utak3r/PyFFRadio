@@ -2,3 +2,5 @@
 *.m3u
 PyFFRadio.ini
 /PyFFRadio/__pycache__/
+/build/
+/dist/
