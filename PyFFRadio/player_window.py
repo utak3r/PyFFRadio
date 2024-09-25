@@ -14,6 +14,11 @@ class Player:
         self.window.finalize()
         self.window['status'].update(value='Loading configuration')
         self.settings.read_settings()
+
+        # Add stations read from config to layout
+        for stacja in self.settings.stations:
+            self.window.extend_layout(self.window['-STATIONS-LIST-'], [self.row_item_station(1, stacja.name)])
+
         self.window['status'].update('Ready')
         while True:
             self.event, self.values = self.window.read()
@@ -32,10 +37,14 @@ class Player:
     def init_layout(self):
         self.layout = []
         info_layout = sg.Text('Title', key='title')
-        lista_layout = sg.Text('Station {i}', key='station') 
+        lista_layout = sg.Column([], key='-STATIONS-LIST-') 
         bottom_buttons_layout = sg.Button('Play', key='play'), sg.Button('Exit', key='exit')
         status_layout = sg.StatusBar('status', key='status')
         self.layout = [ [info_layout, lista_layout], [bottom_buttons_layout], [status_layout] ]
+
+    def row_item_station(self, row_num, station_name):
+        item = [sg.Column([[sg.Text(f'Radio {station_name}', key=('-NAME-', station_name))]], key=('-ROW-', row_num))]
+        return item
 
     def play_station(self):
         # As of now, second try not working, to say at least.
