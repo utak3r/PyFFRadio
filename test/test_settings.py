@@ -3,6 +3,17 @@ from PyFFRadio.settings import RadioStation, RadioStationsList, Settings
 
 class TestRadioStation:
 
+    def test_constructor(self):
+        stacja1 = RadioStation()
+        assert stacja1.name == 'no name'
+        assert stacja1.url == 'http://127.0.0.1'
+        stacja2 = RadioStation('That is a nice name!')
+        assert stacja2.name == 'That is a nice name!'
+        assert stacja2.url == 'http://127.0.0.1'
+        stacja3 = RadioStation('That is a nice name!', 'http://somewhere.in.a.web/')
+        assert stacja3.name == 'That is a nice name!'
+        assert stacja3.url == 'http://somewhere.in.a.web/'
+
     def test_set_name(self):
         name = 'Very Nice Name'
         stacja = RadioStation()
@@ -34,6 +45,10 @@ class TestRadioStation:
 
         stacja2.set_name(some_name)
         assert stacja1 == stacja2
+    
+    def test_operator_str(self):
+        stacja = RadioStation('Great station')
+        assert f'{stacja}' == 'RadioStation(Name: Great station, URL: http://127.0.0.1)'
 
 class TestRadioStationsList:
 

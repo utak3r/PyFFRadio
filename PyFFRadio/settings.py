@@ -2,10 +2,18 @@ import configparser
 
 class RadioStation:
 
-    def __init__(self):
+    # Of course, Python is incapable of overloading methods (and thus construcotrs)...
+    # Let's hack it then.
+    def __init__(self, *args):
         self.name = 'no name'
         self.url = 'http://127.0.0.1'
 
+        if len(args) == 2:
+            self.name = args[0]
+            self.url = args[1]
+        elif len(args) == 1:
+            self.name = args[0]
+    
     def set_name(self, new_name: str):
         self.name = new_name
     
@@ -19,6 +27,9 @@ class RadioStation:
             return self.name == other
         else:
             return NotImplemented
+    
+    def __str__(self):
+        return "RadioStation(Name: {}, URL: {})".format(self.name, self.url)
 
 
 class RadioStationsList:
