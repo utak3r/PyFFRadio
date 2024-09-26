@@ -4,3 +4,4 @@ PyFFRadio.ini
 /PyFFRadio/__pycache__/
 /build/
 /dist/
+/test/__pycache__/

@@ -11,6 +11,14 @@ class RadioStation:
     
     def set_url(self, new_url: str):
         self.url = new_url
+    
+    def __eq__(self, other):
+        if isinstance(other, RadioStation):
+            return self.name == other.name
+        elif isinstance(other, str):
+            return self.name == other
+        else:
+            return NotImplemented
 
 
 class RadioStationsList:
@@ -24,8 +32,13 @@ class RadioStationsList:
     def add(self, station: RadioStation):
         self.stations_list.append(station)
     
+    def get_item_index_by_name(self, name: str) -> int:
+        index = self.stations_list.index(name)
+        return index
+
     def __iadd__(self, station: RadioStation):
         self.stations_list.append(station)
+        return self
 
     def __len__(self) -> int:
         return len(self.stations_list)
