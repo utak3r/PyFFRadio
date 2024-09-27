@@ -55,12 +55,10 @@ class Player:
         return item
 
     def cleanup_player(self):
-        # As of now, second try not working, to say at least.
-        # Need to work on cleaning up previous playback.
         if self.runner is not None:
             self.runner.terminate()
-            #del self.runner
-            #self.runner = None
+            del self.runner
+            self.runner = None
 
     def play_station(self, which_station):
         if isinstance(which_station, int):
@@ -70,7 +68,7 @@ class Player:
             station_url = self.settings.stations[which_station].url
             command = '"' + ffmpeg + '" -nodisp "' + station_url + '"'
             self.runner = process_tools.ProcessRunner()
-            self.runner.run_command(command)
+            self.runner.run_command(f'{ffmpeg}', '-nodisp', f'{station_url}')
             # For now I have some issue with status bar not showing the full string
             # will solve it later...
             #status_text = 'Now playing: quite long station name' + station_name

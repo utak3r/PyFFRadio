@@ -13,9 +13,9 @@ class ProcessRunner:
     def __del__(self):
         self.terminate()
     
-    def run_command(self, command):
-        self.add_log(command)
-        asyncio.run(self.run(command))
+    def run_command(self, program, *args):
+        self.add_log(f'{program} {args}')
+        asyncio.run(self.run(program, *args))
     
     async def read_stream(self, stream):
         while self.process.returncode is None:
@@ -32,22 +32,20 @@ class ProcessRunner:
 
     # WARNING!
     # This code REQUIRES Python 3.11 at least!
-    async def run(self, command):
+    async def run(self, program, *args):
         try:
-            self.process = await asyncio.create_subprocess_shell(command, stdin=asyncio.subprocess.DEVNULL, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+            self.process = await asyncio.create_subprocess_exec(program, *args, stdin=asyncio.subprocess.DEVNULL, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
             async with asyncio.TaskGroup() as tg:
                 read_stdout_task = asyncio.create_task(self.read_stream(self.process.stdout))
                 read_stderr_task = asyncio.create_task(self.read_stream(self.process.stderr))
         finally:
-            self.add_log("Running command has finished: " + command)
+            self.add_log("Running command has finished: " + f'{program} {args}')
 
 
     def terminate(self):
         """ Terminate the subprocess. """
         if self.process is not None:
-            # Somehow terminate doesn't work for ffplay, it behaves best, when killed with CTRL_BREAK_EVENT
-            self.process.send_signal(CTRL_BREAK_EVENT)
-            #self.process.terminate()
+            self.process.terminate()
 
     def add_log(self, text):
         print(text)
