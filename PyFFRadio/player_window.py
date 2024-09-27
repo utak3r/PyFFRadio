@@ -43,7 +43,7 @@ class Player:
 
     def init_layout(self):
         self.layout = []
-        info_layout = sg.Text('Title', key='title')
+        info_layout = sg.Text('Title', key='current-station')
         lista_layout = sg.Column([], key='-STATIONS-LIST-') 
         bottom_buttons_layout = sg.Button('Play', key='play'), sg.Button('Exit', key='exit')
         #status_layout = sg.StatusBar('status', key='status', auto_size_text=True, expand_x=True, justification='left')
@@ -69,6 +69,7 @@ class Player:
             command = '"' + ffmpeg + '" -nodisp "' + station_url + '"'
             self.runner = process_tools.ProcessRunner()
             self.runner.run_command(f'{ffmpeg}', '-nodisp', f'{station_url}')
+            self.window['current-station'].update(station_name)
             # For now I have some issue with status bar not showing the full string
             # will solve it later...
             #status_text = 'Now playing: quite long station name' + station_name
