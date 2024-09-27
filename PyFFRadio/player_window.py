@@ -13,7 +13,7 @@ class Player:
     def run(self):
         self.window.finalize()
         #self.window['status'].update(value='Loading configuration')
-        self.settings.read_settings()
+        self.settings.read_settings('PyFFRadio.ini')
 
         # Add stations read from config to layout
         for stacja in self.settings.stations:
@@ -38,7 +38,7 @@ class Player:
                     print("New station selected: ", station_name)
                     self.play_station(station_name)
 
-        self.settings.write_settings()
+        self.settings.write_settings('PyFFRadio.ini')
         self.window.close()
 
     def init_layout(self):

@@ -85,16 +85,39 @@ class Settings:
     def set_ffmpeg(self, new_path: str):
         self.ffmpeg_ = new_path
 
-    def read_settings(self):
+    # Prepare config object
+    def prepare_settings_object(self) -> configparser.ConfigParser:
         config = configparser.ConfigParser()
-        # Below line changes the default behaviour of ConfigParser
-        # making the keys to be case sensitive :)
-        config.optionxform = str
-        config.read('PyFFRadio.ini', encoding="utf-8")
+        config.optionxform = str # make it case sensitive
+        return config
+
+    # Read config from file.
+    def read_settings_file(self, path) -> configparser.ConfigParser:
+        config = self.prepare_settings_object()
+        config.read(path, encoding="utf-8")
+        return config
+    
+    # Write config to a file
+    def write_settings_file(self, config:configparser.ConfigParser, path: str):
+        with open(path, mode='w', encoding="utf-8") as configfile:
+            config.write(configfile)
+
+    # Take care of default FFMPEG path and at least one radio station.
+    def provide_defaults(self, config: configparser.ConfigParser) -> configparser.ConfigParser:
         try:
-            self.ffmpeg_ = config['PATHS']['FFMPEG_Path']
+            ffmpeg = config['GENERAL']['FFMPEG_Path']
         except KeyError:
-            print("Error: Couldn't find a FFMPEG_Path entry in config file.")
+            config['GENERAL'] = {}
+            config['GENERAL']['FFMPEG_Path'] = 'C:\\tools\\ffmpeg\\bin'
+        if not config.has_section('STATIONS'):
+            config['STATIONS'] = {}
+            config['STATIONS']['Radio 357'] = 'https://live.r357.eu'
+        return config
+
+    def read_settings(self, config_file_path: str):
+        config = self.read_settings_file(config_file_path)
+        config = self.provide_defaults(config)
+        self.ffmpeg_ = config['GENERAL']['FFMPEG_Path']
         self.stations.clear()
         for stacja in config['STATIONS']:
             station = RadioStation()
@@ -105,10 +128,9 @@ class Settings:
             print(stacja.name + " : " + stacja.url)
         return
     
-    def write_settings(self):
-        config = configparser.ConfigParser()
-        config.optionxform = str
-        config['PATHS'] = { 'FFMPEG_Path': self.ffmpeg_ }
+    def write_settings(self, config_file_path: str):
+        config = self.prepare_settings_object()
+        config['GENERAL'] = { 'FFMPEG_Path': self.ffmpeg_ }
         config['STATIONS'] = {}
         for stacja in self.stations:
             try:
@@ -116,7 +138,6 @@ class Settings:
             except KeyError:
                 print("Error while writing list of radio stations into config file.")
 
-        with open('PyFFRadio.ini', mode='w', encoding="utf-8") as configfile:
-            config.write(configfile)
+        self.write_settings_file(config, config_file_path)
         return
     

@@ -1,4 +1,5 @@
 import pytest
+import pathlib
 from PyFFRadio.settings import RadioStation, RadioStationsList, Settings
 
 class TestRadioStation:
@@ -125,3 +126,79 @@ class TestRadioStationsList:
         for stacja in lista:
             assert stacja.name == f'stacja {i}'
             i += 1
+
+class TestSettings:
+
+    def write_file(self, path, text):
+        file = open(path, mode='w', encoding='utf-8')
+        file.write(text)
+        file.close()
+    
+    def remove_file(self, path):
+        pathlib.Path('./' + path).unlink()
+
+    def test_read_settings_file(self):
+        file = 'test_config_file.ini'
+        default_ffmpeg_path = 'C:\\tools\\ffmpeg\\bin'
+        default_station_name = 'Radio 357'
+
+        config_test_1_src = '' # empty file
+        self.write_file(file, config_test_1_src)
+
+        settings = Settings()
+        assert settings.ffmpeg() == '.'
+        assert len(settings.stations) == 0
+        settings.read_settings(file)
+        assert settings.ffmpeg() == default_ffmpeg_path
+        assert len(settings.stations) == 1
+        assert settings.stations[0].name == default_station_name
+
+        # remove file
+        self.remove_file(file)
+
+        config_test_2_src = '[GENERAL]\nFFMPEG_Path = C:\\Program Files\\ffmpeg\\bin' # no radio stations provided
+        self.write_file(file, config_test_2_src)
+
+        settings = Settings()
+        assert settings.ffmpeg() == '.'
+        assert len(settings.stations) == 0
+        settings.read_settings(file)
+        assert settings.ffmpeg() == 'C:\\Program Files\\ffmpeg\\bin'
+        assert len(settings.stations) == 1
+        assert settings.stations[0].name == default_station_name
+
+        # remove file
+        self.remove_file(file)
+
+        # full config with 2 stations
+        config_test_3_src = '[GENERAL]\nFFMPEG_Path = C:\\Strange path\\ffmpeg\\bin\n\n[STATIONS]\nSuperFM = https://stream.super.fm:8443/superfm.mp3?1727132225114\nAntyradio = https://an.cdn.eurozet.pl/ant-web.mp3' 
+        self.write_file(file, config_test_3_src)
+
+        settings = Settings()
+        assert settings.ffmpeg() == '.'
+        assert len(settings.stations) == 0
+        settings.read_settings(file)
+        assert settings.ffmpeg() == 'C:\\Strange path\\ffmpeg\\bin'
+        assert len(settings.stations) == 2
+        assert settings.stations[0].name == 'SuperFM'
+        assert settings.stations[0].url == 'https://stream.super.fm:8443/superfm.mp3?1727132225114'
+        assert settings.stations[1].name == 'Antyradio'
+        assert settings.stations[1].url == 'https://an.cdn.eurozet.pl/ant-web.mp3'
+
+        # remove file
+        self.remove_file(file)
+
+    def test_write_settings(self):
+        file = 'test_config_file.ini'
+        settings = Settings()
+        settings.set_ffmpeg('C:\\Program Files\\ffmpeg\\bin')
+        settings.stations.add(RadioStation('Antyradio', 'https://an.cdn.eurozet.pl/ant-web.mp3'))
+        settings.stations.add(RadioStation('SuperFM', 'https://stream.super.fm:8443/superfm.mp3?1727132225114'))
+        settings.write_settings(file)
+
+        read_file = open(file, mode='r', encoding='utf-8').read()
+        assert read_file == '[GENERAL]\nFFMPEG_Path = C:\\Program Files\\ffmpeg\\bin\n\n[STATIONS]\nAntyradio = https://an.cdn.eurozet.pl/ant-web.mp3\nSuperFM = https://stream.super.fm:8443/superfm.mp3?1727132225114\n\n'
+
+        # remove file
+        self.remove_file(file)
+       
