@@ -32,9 +32,6 @@ class Player:
                     self.runner = None
                 break
 
-            if self.event == 'play':
-                self.play_station(0)
-            
             if isinstance(self.event, tuple):
                 if self.event[0] == 'station selection':
                     station_name = self.event[1]
@@ -48,7 +45,7 @@ class Player:
         self.layout = []
         info_layout = sg.Text('Title', key='current-station')
         lista_layout = sg.Column([], key='-STATIONS-LIST-', size=(200,120), scrollable=True, vertical_scroll_only=True) 
-        bottom_buttons_layout = sg.Button('Play', key='play'), sg.Button('Exit', key='exit')
+        bottom_buttons_layout = sg.Push(), sg.Button('Exit', key='exit', size=(15,1)), sg.Push()
         self.layout = [ [info_layout, sg.Push(), lista_layout], [bottom_buttons_layout] ]
 
     def row_item_station(self, row_num, station_name):
