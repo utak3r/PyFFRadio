@@ -9,17 +9,20 @@ class Player:
         self.window = sg.Window("Player", self.layout)
         self.runner = None
         self.settings = settings.Settings()
+        self.station_button_color = '#CC8800'
 
     def run(self):
         self.window.finalize()
+        self.window.set_min_size((400,150))
         #self.window['status'].update(value='Loading configuration')
         self.settings.read_settings('PyFFRadio.ini')
 
         # Add stations read from config to layout
         for stacja in self.settings.stations:
             self.window.extend_layout(self.window['-STATIONS-LIST-'], [self.row_item_station(1, stacja.name)])
+            self.window.refresh()
+            self.window['-STATIONS-LIST-'].contents_changed()
 
-        #self.window['status'].update('Ready')
         while True:
             self.event, self.values = self.window.read()
             #print('DEBUG: Event came in: ', self.event)
@@ -44,14 +47,18 @@ class Player:
     def init_layout(self):
         self.layout = []
         info_layout = sg.Text('Title', key='current-station')
-        lista_layout = sg.Column([], key='-STATIONS-LIST-') 
+        lista_layout = sg.Column([], key='-STATIONS-LIST-', size=(200,120), scrollable=True, vertical_scroll_only=True) 
         bottom_buttons_layout = sg.Button('Play', key='play'), sg.Button('Exit', key='exit')
-        #status_layout = sg.StatusBar('status', key='status', auto_size_text=True, expand_x=True, justification='left')
-        #self.layout = [ [info_layout, lista_layout], [bottom_buttons_layout], [status_layout] ]
-        self.layout = [ [info_layout, lista_layout], [bottom_buttons_layout] ]
+        self.layout = [ [info_layout, sg.Push(), lista_layout], [bottom_buttons_layout] ]
 
     def row_item_station(self, row_num, station_name):
-        item = [sg.Column([[sg.Text(f'{station_name}', key=('station selection', station_name), enable_events=True)]], key=('-ROW-', row_num))]
+        item = [sg.Button(f'{station_name}', key=('station selection', station_name), 
+                                      auto_size_button=False, 
+                                      expand_x=True, 
+                                      size=(25,1),
+                                      pad=(4, 0), 
+                                      use_ttk_buttons=True, 
+                                      button_color=self.station_button_color)]
         return item
 
     def cleanup_player(self):
@@ -69,11 +76,7 @@ class Player:
             command = '"' + ffmpeg + '" -nodisp "' + station_url + '"'
             self.runner = process_tools.ProcessRunner()
             self.runner.run_command(f'{ffmpeg}', '-nodisp', f'{station_url}')
-            self.window['current-station'].update(station_name)
-            # For now I have some issue with status bar not showing the full string
-            # will solve it later...
-            #status_text = 'Now playing: quite long station name' + station_name
-            #self.window['status'].update(value=station_name)
+            self.window['current-station'].update(f'{self.runner.info.name}\n{self.runner.info.description}')
         elif isinstance(which_station, str):
             index = self.settings.stations.get_item_index_by_name(which_station)
             self.play_station(index)
