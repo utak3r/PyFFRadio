@@ -98,6 +98,16 @@ class Player:
         img.save(imgbuff, format='PNG')
         return base64.b64encode(imgbuff.getbuffer())
 
+    def resize_img_with_aspect_ratio(self, img: Image.Image, size: tuple, keep_aspect: bool) -> Image.Image:
+        imgret = img
+        if keep_aspect:
+            aspect = img.width / img.height
+            new_height = int(size[0] / aspect)
+            imgret = img.resize((size[0],new_height))
+        else:
+            imgret = img.resize(size)
+        return imgret
+
     def download_stations_covers(self, stations: settings.RadioStationsList, size: tuple):
         for stacja in stations:
             if stacja.cover_url not in (None, ''):
@@ -109,5 +119,6 @@ class Player:
                     except UnidentifiedImageError:
                         stacja.cover = None
                     else:
-                        img = img.resize(size=size)
+                        #img = img.resize(size=size)
+                        img = self.resize_img_with_aspect_ratio(img, size, True)
                         stacja.cover = self.get_base64_string_from_image(img)
