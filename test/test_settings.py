@@ -14,6 +14,10 @@ class TestRadioStation:
         stacja3 = RadioStation('That is a nice name!', 'http://somewhere.in.a.web/')
         assert stacja3.name == 'That is a nice name!'
         assert stacja3.url == 'http://somewhere.in.a.web/'
+        stacja4 = RadioStation('Another name...', 'http://link.to.radio/', 'http://link.to/logo.png')
+        assert stacja4.name == 'Another name...'
+        assert stacja4.url == 'http://link.to.radio/'
+        assert stacja4.cover_url == 'http://link.to/logo.png'
 
     def test_set_name(self):
         name = 'Very Nice Name'
@@ -28,6 +32,13 @@ class TestRadioStation:
         assert stacja.url == 'http://127.0.0.1'
         stacja.set_url(url)
         assert stacja.url == url
+    
+    def test_set_cover_url(self):
+        url = 'http://here.is.some/logo.png'
+        stacja = RadioStation()
+        assert stacja.cover_url == ''
+        stacja.set_cover_url(url)
+        assert stacja.cover_url == url
 
     def test_operator_eq(self):
         stacja1 = RadioStation()
@@ -192,12 +203,12 @@ class TestSettings:
         file = 'test_config_file.ini'
         settings = Settings()
         settings.set_ffmpeg('C:\\Program Files\\ffmpeg\\bin')
-        settings.stations.add(RadioStation('Antyradio', 'https://an.cdn.eurozet.pl/ant-web.mp3'))
-        settings.stations.add(RadioStation('SuperFM', 'https://stream.super.fm:8443/superfm.mp3?1727132225114'))
+        settings.stations.add(RadioStation('Super Station', 'https://super.station/web.mp3', 'http://logos.com/logo1.png'))
+        settings.stations.add(RadioStation('Fantastic Station', 'https://fantastic.station/stream.mp3', 'http://logos.com/logo2.png'))
         settings.write_settings(file)
 
         read_file = open(file, mode='r', encoding='utf-8').read()
-        assert read_file == '[GENERAL]\nFFMPEG_Path = C:\\Program Files\\ffmpeg\\bin\n\n[STATIONS]\nAntyradio = https://an.cdn.eurozet.pl/ant-web.mp3\nSuperFM = https://stream.super.fm:8443/superfm.mp3?1727132225114\n\n'
+        assert read_file == '[GENERAL]\nFFMPEG_Path = C:\\Program Files\\ffmpeg\\bin\n\n[STATIONS]\nSuper Station = https://super.station/web.mp3\nFantastic Station = https://fantastic.station/stream.mp3\n\n[COVERS]\nSuper Station = http://logos.com/logo1.png\nFantastic Station = http://logos.com/logo2.png\n\n'
 
         # remove file
         self.remove_file(file)
