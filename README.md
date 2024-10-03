@@ -1,13 +1,23 @@
 # PyFFRadio
 
-Simple app for playing internet radio.
-Just started the skeleton, so not so much in here yet.
-Stay tuned! ;)
+Simple app for playing internet radio.  
+It relies on a simple INI file with radio stations names, stream urls and logo urls. See the included sample INI file.
+No editor at this point.  
+It is using the simplest version of PySimpleGui, as I wanted to check what's possible with that lib.  
+For actual stream playback it's utilizing ffplay. Path to directory containing it is stored in an INI file.
 
-**Edit**
-
-It's slowly progressing. See the below screenshot.
 ![Screenshot](./screenshot.png?raw=true "Screenshot of a running application")
+
+
+# Prerequisites
+- Python >= 3.11
+- PySimpleGui
+- requests
+- Pillow
+- base64
+- asyncio
+- ConfigParser
+- PyInstaller (not for running, but for building independent standalone executable)
 
 # Running
 Run this little app::
@@ -15,20 +25,8 @@ Run this little app::
 python -m PyFFRadio
 ```
 
-For VSCode, use *launch.json* file in your *.vscode* subdirectory:
-```
-{
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Python Debugger: Module",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "PyFFRadio"
-        }
-    ]
-}
-```
+Some useful things for easy VSCode usage are included, in *launch.json*, *settings.json* and *tasks.json*.  
+Also *PyFFRadio.spec* file for using with PyInstaller is included.
 
 # Building a standalone app without Python
 Just run PyInstaller using included spec file:
