@@ -1,7 +1,7 @@
 import PySimpleGUI as sg
 import io
 import requests
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 import base64
 from PyFFRadio import process_tools
 from PyFFRadio import settings
@@ -104,6 +104,10 @@ class Player:
                 req = requests.get(stacja.cover_url, stream=True)
                 if req.status_code == 200:
                     buff = io.BytesIO(req.content)
-                    img = Image.open(buff)
-                    img = img.resize(size=size)
-                    stacja.cover = self.get_base64_string_from_image(img)
+                    try:
+                        img = Image.open(buff)
+                    except UnidentifiedImageError:
+                        stacja.cover = None
+                    else:
+                        img = img.resize(size=size)
+                        stacja.cover = self.get_base64_string_from_image(img)
