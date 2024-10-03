@@ -7,7 +7,13 @@ class RadioStation:
     def __init__(self, *args):
         self.name = 'no name'
         self.url = 'http://127.0.0.1'
+        self.cover_url = ''
+        self.cover = None
 
+        if len(args) == 3:
+            self.name = args[0]
+            self.url = args[1]
+            self.cover_url = args[2]
         if len(args) == 2:
             self.name = args[0]
             self.url = args[1]
@@ -19,6 +25,10 @@ class RadioStation:
     
     def set_url(self, new_url: str):
         self.url = new_url
+    
+    def set_cover_url(self, new_url: str):
+        self.cover_url = new_url
+        self.cover = None
     
     def __eq__(self, other):
         if isinstance(other, RadioStation):
@@ -124,17 +134,23 @@ class Settings:
             station.set_name(stacja)
             station.set_url(config['STATIONS'][stacja])
             self.stations.add(station)
-        for stacja in self.stations:
-            print(stacja.name + " : " + stacja.url)
+        # for stacja in self.stations:
+        #     print(stacja.name + " : " + stacja.url)
+        if config.has_section('COVERS'):
+            for stacja in config['COVERS']:
+                if stacja in self.stations.stations_list:
+                    self.stations[self.stations.get_item_index_by_name(stacja)].set_cover_url(config['COVERS'][stacja])
         return
     
     def write_settings(self, config_file_path: str):
         config = self.prepare_settings_object()
         config['GENERAL'] = { 'FFMPEG_Path': self.ffmpeg_ }
         config['STATIONS'] = {}
+        config['COVERS'] = {}
         for stacja in self.stations:
             try:
                 config['STATIONS'][stacja.name] = stacja.url
+                config['COVERS'][stacja.name] = stacja.cover_url
             except KeyError:
                 print("Error while writing list of radio stations into config file.")
 

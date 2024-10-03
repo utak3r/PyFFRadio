@@ -1,6 +1,12 @@
 import PySimpleGUI as sg
+import io
+import requests
+from PIL import Image
+import base64
 from PyFFRadio import process_tools
 from PyFFRadio import settings
+
+COVER_IMG_SIZE=(96,96)
 
 class Player:
 
@@ -22,6 +28,8 @@ class Player:
             self.window.extend_layout(self.window['-STATIONS-LIST-'], [self.row_item_station(1, stacja.name)])
             self.window.refresh()
             self.window['-STATIONS-LIST-'].contents_changed()
+        # Download covers (images)
+        self.download_stations_covers(self.settings.stations, COVER_IMG_SIZE)
 
         while True:
             self.event, self.values = self.window.read()
@@ -43,7 +51,7 @@ class Player:
 
     def init_layout(self):
         self.layout = []
-        info_layout = sg.Text('Title', key='current-station')
+        info_layout = [sg.Push(), sg.Image(size=COVER_IMG_SIZE, key='current-station-cover'), sg.Push()], [sg.Push(), sg.Text('Title', key='current-station'), sg.Push()]
         lista_layout = sg.Column([], key='-STATIONS-LIST-', size=(200,120), scrollable=True, vertical_scroll_only=True) 
         bottom_buttons_layout = sg.Push(), sg.Button('Exit', key='exit', size=(15,1)), sg.Push()
         self.layout = [ [info_layout, sg.Push(), lista_layout], [bottom_buttons_layout] ]
@@ -74,9 +82,28 @@ class Player:
             self.runner = process_tools.ProcessRunner()
             self.runner.run_command(f'{ffmpeg}', '-nodisp', f'{station_url}')
             self.window['current-station'].update(f'{self.runner.info.name}\n{self.runner.info.description}')
+            raw_img = None
+            if self.settings.stations[which_station].cover:
+                raw_img = self.settings.stations[which_station].cover
+            self.window['current-station-cover'].update(data=raw_img)
         elif isinstance(which_station, str):
             index = self.settings.stations.get_item_index_by_name(which_station)
             self.play_station(index)
         else:
             NotImplemented
 
+    def get_base64_string_from_image(self, img: Image.Image) -> str:
+        """Return PNG Base64 encoded string from an image"""
+        imgbuff = io.BytesIO()
+        img.save(imgbuff, format='PNG')
+        return base64.b64encode(imgbuff.getbuffer())
+
+    def download_stations_covers(self, stations: settings.RadioStationsList, size: tuple):
+        for stacja in stations:
+            if stacja.cover_url not in (None, ''):
+                req = requests.get(stacja.cover_url, stream=True)
+                if req.status_code == 200:
+                    buff = io.BytesIO(req.content)
+                    img = Image.open(buff)
+                    img = img.resize(size=size)
+                    stacja.cover = self.get_base64_string_from_image(img)
