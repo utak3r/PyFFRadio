@@ -52,11 +52,19 @@ class ProcessRunner:
     
     async def read_process_output(self, process):
         while process.returncode is None:
-            line = await process.stdout.readline()
-            if line:
-                #print(line.decode('utf-8').rstrip())
-                if self.analyze_stream_output(line.decode('utf-8').rstrip()):
-                    break
+            try:
+                line = await process.stdout.readline()
+            except (RuntimeError, KeyboardInterrupt, asyncio.LimitOverrunError, asyncio.IncompleteReadError):
+                continue
+            else:
+                if line:
+                    try:
+                        decoded_line = line.decode('utf-8', errors='ignore')
+                    except (ValueError, TypeError):
+                        continue
+                    else:
+                        if self.analyze_stream_output(decoded_line.rstrip()):
+                            break
             await asyncio.sleep(0.1)
 
     # WARNING!
@@ -78,6 +86,7 @@ class ProcessRunner:
         self.info = RadioStreamDescription()
         async with asyncio.TaskGroup() as tg:
            self.read_stdout_task = tg.create_task(self.read_process_output(self.process))
+        self.read_stdout_task.done()
         print(self.info)
 
 
