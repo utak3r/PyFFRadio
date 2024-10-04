@@ -1,4 +1,6 @@
 import configparser
+import os
+import platform
 
 class RadioStation:
 
@@ -157,3 +159,29 @@ class Settings:
         self.write_settings_file(config, config_file_path)
         return
     
+    def select_os_binary(self, binary: str) -> str:
+        """Add system platform dependent / or \\ and eventually .exe"""
+        file = binary
+        system = platform.system()
+        if system == 'Windows':
+            file = '\\' + file + '.exe'
+        else:
+            file = '/' + file
+        return file
+    
+    def construct_full_binary_path(self, dir: str, binary: str) -> str:
+        bin = self.select_os_binary(binary)
+        return f'{dir}{bin}'
+
+    def check_for_ffmpeg_binary(self) -> str:
+        full_path = ''
+        dirpath = self.ffmpeg()
+        if os.path.isdir(dirpath):
+            path = self.construct_full_binary_path(dirpath, 'ffplay')
+            if os.path.isfile(path):
+                full_path = path
+            else:
+                raise FileExistsError
+        else:
+            raise NotADirectoryError
+        return full_path

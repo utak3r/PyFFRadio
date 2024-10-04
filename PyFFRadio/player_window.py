@@ -75,7 +75,14 @@ class Player:
     def play_station(self, which_station):
         if isinstance(which_station, int):
             self.cleanup_player()
-            ffmpeg = self.settings.ffmpeg() + '\\ffplay.exe'
+            try:
+                ffmpeg = self.settings.check_for_ffmpeg_binary()
+            except NotADirectoryError:
+                sg.popup_error('Given directory path cannot be found.', title='Error')
+                return
+            except FileExistsError:
+                sg.popup_error('Cannot find ffplay in a given directory.', title='Error')
+                return
             station_name = self.settings.stations[which_station].name
             station_url = self.settings.stations[which_station].url
             command = '"' + ffmpeg + '" -nodisp "' + station_url + '"'

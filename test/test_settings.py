@@ -1,5 +1,6 @@
 import pytest
 import pathlib
+import platform
 from PyFFRadio.settings import RadioStation, RadioStationsList, Settings
 
 class TestRadioStation:
@@ -212,4 +213,20 @@ class TestSettings:
 
         # remove file
         self.remove_file(file)
-       
+    
+    def test_select_os_binary(self):
+        settings = Settings()
+        system = platform.system()
+        if system == 'Windows':
+            assert settings.select_os_binary('ffmpeg') == '\\ffmpeg.exe'
+        else:
+            assert settings.select_os_binary('ffmpeg') == '/ffmpeg'
+    
+    def test_construct_full_binary_path(self):
+        settings = Settings()
+        system = platform.system()
+        if system == 'Windows':
+            assert settings.construct_full_binary_path('c:\\directory', 'ffmpeg') == 'c:\\directory\\ffmpeg.exe'
+        else:
+            assert settings.construct_full_binary_path('/usr/bin', 'ffmpeg') == '/usr/bin/ffmpeg'
+        
